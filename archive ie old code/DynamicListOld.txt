@@ -1,0 +1,125 @@
+import React, { useState } from "react";
+import {
+	View,
+	Text,
+	TextInput,
+	Button,
+	FlatList,
+	StyleSheet,
+	TouchableOpacity,
+} from "react-native";
+
+const DynamicList = ({ dataArray, setDataArray, onBack }) => {
+	const [newItem, setNewItem] = useState("");
+
+	const addItemToList = () => {
+		if (newItem.trim() !== "") {
+			setDataArray((prevArray) => [...prevArray, newItem]);
+			setNewItem("");
+		}
+	};
+
+	const deleteItem = (index) => {
+		const updatedArray = [...dataArray];
+		updatedArray.splice(index, 1);
+		setDataArray(updatedArray);
+	};
+
+	const renderListItem = ({ item, index }) => (
+		<View style={styles.listItem}>
+			<Text style={styles.listItemText}>{item}</Text>
+			<TouchableOpacity onPress={() => deleteItem(index)}>
+				<Text style={styles.deleteButton}>Delete</Text>
+			</TouchableOpacity>
+		</View>
+	);
+
+	return (
+		<View style={styles.container}>
+			{/* <TouchableOpacity style={styles.backButton} onPress={onBack}>
+				<Text style={styles.backButtonText}>Back</Text>
+			</TouchableOpacity> */}
+
+			<View style={styles.backButton}>
+				<Button title="Cancel" onPress={onBack} color="#f31282" />
+			</View>
+
+			<FlatList
+				data={dataArray}
+				renderItem={renderListItem}
+				keyExtractor={(item, index) => index.toString()}
+			/>
+
+			<TextInput
+				style={styles.input}
+				placeholderTextColor="#aaa"
+				placeholder="Enter item"
+				value={newItem}
+				onChangeText={(text) => setNewItem(text)}
+			/>
+
+			<TouchableOpacity style={styles.addButton} onPress={addItemToList}>
+				<Text style={styles.buttonText}>+</Text>
+			</TouchableOpacity>
+		</View>
+	);
+};
+
+const styles = StyleSheet.create({
+	container: {
+		flex: 1,
+		padding: 20,
+		backgroundColor: "#3d1425",
+	},
+	input: {
+		height: 50,
+		width: "85%",
+		borderColor: "gray",
+		borderWidth: 1,
+		marginBottom: 10,
+		paddingHorizontal: 8,
+		color: "white",
+	},
+	addButton: {
+		position: "absolute",
+		bottom: 30,
+		right: 20,
+		width: 50,
+		height: 50,
+		borderRadius: 25,
+		backgroundColor: "blue",
+		justifyContent: "center",
+		alignItems: "center",
+	},
+	buttonText: {
+		color: "white",
+		fontSize: 24,
+	},
+	listItem: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center",
+		padding: 10,
+		borderBottomWidth: 1,
+		borderBottomColor: "lightgray",
+	},
+	listItemText: {
+		color: "white",
+		fontSize: 20,
+	},
+	deleteButton: {
+		color: "red",
+	},
+	backButton: {
+		position: "absolute",
+		top: 20,
+		left: 20,
+		padding: 10,
+	},
+	backButtonText: {
+		color: "white",
+		fontSize: 16,
+	},
+});
+
+export default DynamicList;
