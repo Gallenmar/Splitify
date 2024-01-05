@@ -1,7 +1,7 @@
 {
 	"expo": {
-		"name": "Trip Mate",
-		"slug": "trip-mate",
+		"name": "TravelCalculator",
+		"slug": "TravelCalculator",
 		"version": "1.0.0",
 		"orientation": "portrait",
 		"icon": "./assets/TripMate.png",
