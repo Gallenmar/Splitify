@@ -25,7 +25,7 @@ export default function App() {
 
 	const [people, setPeople] = useState([]);
 	const [history, setHistory] = useState([]);
-	const [sums, setSums] = useState([]);
+	// const [sums, setSums] = useState([]);
 	const [tableData, setTableData] = useState([]);
 
 	//TODO
@@ -64,25 +64,25 @@ export default function App() {
 				payerExpenses[payer][id].totalExpense += parseInt(price, 10);
 			});
 		});
-		const aggregatedExpenses = [];
+		// const aggregatedExpenses = [];
 
-		// Iterate through the payerExpenses object and push the data to the array
-		for (const payer in payerExpenses) {
-			for (const beneficiaryId in payerExpenses[payer]) {
-				console.log("payer: ", payer.text);
-				aggregatedExpenses.push({
-					payer: payer,
-					beneficiary: {
-						id: beneficiaryId,
-						name: payerExpenses[payer][beneficiaryId].name,
-						totalExpense: payerExpenses[payer][beneficiaryId].totalExpense,
-					},
-				});
-			}
-		}
+		// // Iterate through the payerExpenses object and push the data to the array
+		// for (const payer in payerExpenses) {
+		// 	for (const beneficiaryId in payerExpenses[payer]) {
+		// 		console.log("payer: ", payer.text);
+		// 		aggregatedExpenses.push({
+		// 			payer: payer,
+		// 			beneficiary: {
+		// 				id: beneficiaryId,
+		// 				name: payerExpenses[payer][beneficiaryId].name,
+		// 				totalExpense: payerExpenses[payer][beneficiaryId].totalExpense,
+		// 			},
+		// 		});
+		// 	}
+		// }
 
-		setSums(aggregatedExpenses);
-		console.log("expenses: ", aggregatedExpenses);
+		// setSums(aggregatedExpenses);
+		// console.log("expenses: ", aggregatedExpenses);
 
 		const tableDataTmp = [
 			["", ...people], // First row with empty cell and people's names
@@ -200,7 +200,7 @@ export default function App() {
 			<View style={styles.appContainer}>
 				<View style={styles.topBar}>
 					<View></View>
-					<Text style={styles.title}>Travel Calculator</Text>
+					<Text style={styles.title}>Trip Mate</Text>
 					<View style={styles.threeDot}>
 						<Button title="⋮" color={"#8a1f56"} onPress={startNameInput} />
 					</View>
@@ -210,7 +210,7 @@ export default function App() {
 					<PeopleTable tableData={tableData} />
 				</SafeAreaView>
 
-				<PayerExpensesList aggregatedExpenses={sums} />
+				{/* <PayerExpensesList aggregatedExpenses={sums} /> */}
 
 				{/* History Section */}
 				<View style={styles.historyContainer}>
@@ -283,9 +283,6 @@ const styles = StyleSheet.create({
 		fontSize: 28,
 	},
 	threeDot: {},
-	goalsContainer: {
-		flex: 5,
-	},
 	peopleTable: {
 		marginTop: 16,
 	},
@@ -294,6 +291,7 @@ const styles = StyleSheet.create({
 	},
 	historyContainer: {
 		marginTop: 20,
+		flex: 1,
 	},
 	historyTitle: {
 		fontSize: 18,

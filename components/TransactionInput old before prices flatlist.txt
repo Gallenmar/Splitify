@@ -70,22 +70,6 @@ const TransactionInputModal = ({ visible, onClose, people, getData }) => {
 		onClose();
 	};
 
-	const renderItem = ({ item }) => (
-		<View key={item.id} style={styles.priceInputContainer}>
-			<Text style={styles.text}>{item.text}</Text>
-			<TextInput
-				style={styles.priceInput}
-				keyboardType="numeric"
-				placeholder="Enter price"
-				placeholderTextColor="grey"
-				onChangeText={(text) => handlePriceInput(item, text)}
-				onBlur={calculateTotalSum}
-			/>
-		</View>
-	);
-
-	const Spacer = ({ height }) => <View style={{ height }} />;
-
 	return (
 		<Modal
 			animationType="slide"
@@ -101,8 +85,6 @@ const TransactionInputModal = ({ visible, onClose, people, getData }) => {
 
 				<Text style={styles.totalSum}>{`Total: ${totalSum.toFixed(2)}`}</Text>
 
-				<Spacer height={10} />
-
 				<View style={styles.sectionContainer}>
 					<Text style={styles.sectionTitle}>Payer</Text>
 					<FlatList
@@ -116,7 +98,7 @@ const TransactionInputModal = ({ visible, onClose, people, getData }) => {
 								]}
 								onPress={() => handlePayerSelection(item)}
 							>
-								<Text style={styles.text}>{item.text}</Text>
+								<Text>{item.text}</Text>
 							</TouchableOpacity>
 						)}
 					/>
@@ -135,13 +117,13 @@ const TransactionInputModal = ({ visible, onClose, people, getData }) => {
 								]}
 								onPress={() => handleBeneficiarySelection(item)}
 							>
-								<Text style={styles.text}>{item.text}</Text>
+								<Text>{item.text}</Text>
 							</TouchableOpacity>
 						)}
 					/>
 				</View>
 
-				{/* <View style={styles.sectionContainer}>
+				<View style={styles.sectionContainer}>
 					<Text style={styles.sectionTitle}>Prices</Text>
 					{selectedBeneficiaries.map((beneficiary) => (
 						<View key={beneficiary.id} style={styles.priceInputContainer}>
@@ -155,14 +137,6 @@ const TransactionInputModal = ({ visible, onClose, people, getData }) => {
 							/>
 						</View>
 					))}
-				</View> */}
-				<View style={styles.sectionContainer}>
-					<Text style={styles.sectionTitle}>Prices</Text>
-					<FlatList
-						data={selectedBeneficiaries}
-						renderItem={renderItem}
-						keyExtractor={(item) => item.id.toString()}
-					/>
 				</View>
 
 				<Button title="Done" onPress={handleDone} />
@@ -176,14 +150,13 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: "center",
 		padding: 20,
-		backgroundColor: "#3d1425",
+		backgroundColor: "white",
 	},
 	totalSum: {
 		fontSize: 18,
 		fontWeight: "bold",
 		textAlign: "center",
 		marginBottom: 10,
-		color: "white",
 	},
 	sectionContainer: {
 		marginBottom: 20,
@@ -193,7 +166,6 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		fontWeight: "bold",
 		marginBottom: 10,
-		color: "white",
 	},
 	personButton: {
 		padding: 10,
@@ -205,9 +177,6 @@ const styles = StyleSheet.create({
 	selectedPerson: {
 		backgroundColor: "#8a1f56",
 		borderColor: "#8a1f56",
-		color: "white",
-	},
-	text: {
 		color: "white",
 	},
 	priceInputContainer: {
@@ -222,7 +191,6 @@ const styles = StyleSheet.create({
 		borderColor: "#ccc",
 		borderRadius: 5,
 		padding: 8,
-		color: "white",
 	},
 	backButton: {
 		position: "absolute",
