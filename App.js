@@ -25,8 +25,8 @@ export default function App() {
 
 	const [people, setPeople] = useState([]);
 	const [history, setHistory] = useState([]);
-	// const [sums, setSums] = useState([]);
 	const [tableData, setTableData] = useState([]);
+	const [relations, setRelations] = useState([]);
 
 	//TODO
 	//create an empty list
@@ -61,28 +61,15 @@ export default function App() {
 				}
 
 				// Update the total expense for the beneficiary and payer
-				payerExpenses[payer][id].totalExpense += parseInt(price, 10);
+				const priceFloat = parseFloat(price); // lets hope TransactionInput.handlePriceInput inputed a valid price in float
+				//todo handle possible error here. Throw error code or smth
+
+				payerExpenses[payer][id].totalExpense += parseFloat(price);
+				payerExpenses[payer][id].totalExpense = parseFloat(
+					payerExpenses[payer][id].totalExpense
+				);
 			});
 		});
-		// const aggregatedExpenses = [];
-
-		// // Iterate through the payerExpenses object and push the data to the array
-		// for (const payer in payerExpenses) {
-		// 	for (const beneficiaryId in payerExpenses[payer]) {
-		// 		console.log("payer: ", payer.text);
-		// 		aggregatedExpenses.push({
-		// 			payer: payer,
-		// 			beneficiary: {
-		// 				id: beneficiaryId,
-		// 				name: payerExpenses[payer][beneficiaryId].name,
-		// 				totalExpense: payerExpenses[payer][beneficiaryId].totalExpense,
-		// 			},
-		// 		});
-		// 	}
-		// }
-
-		// setSums(aggregatedExpenses);
-		// console.log("expenses: ", aggregatedExpenses);
 
 		const tableDataTmp = [
 			["", ...people], // First row with empty cell and people's names
@@ -95,47 +82,57 @@ export default function App() {
 		];
 		// sift thru the table
 		for (let row = 1; row < tableDataTmp.length; row++) {
-			for (let col = 1; col < tableDataTmp[row].length; col++) {
+			for (let col = row; col < tableDataTmp[row].length; col++) {
 				const idFirstRowSameCol = tableDataTmp[0][col].id;
 				const idSameRowFirstCol = tableDataTmp[row][0].id;
-				console.log("Current cell:", tableDataTmp[row][col], row, col);
-				console.log("idFirstRowSameCol:", idFirstRowSameCol);
-				console.log("idSameRowFirstCol:", idSameRowFirstCol);
-
+				let payout = 0;
 				// Check if the payer exists in the payerExpenses object
 				if (payerExpenses[idFirstRowSameCol]) {
 					// Check if the beneficiary exists for the specified payer
 					if (payerExpenses[idFirstRowSameCol][idSameRowFirstCol]) {
 						// Access the totalExpense for the specified payer and beneficiary
-						console.log(
-							"theoretical expense: ",
-							payerExpenses[idFirstRowSameCol][idSameRowFirstCol].totalExpense
-						);
-						tableDataTmp[row][col].text =
+						//console.log("theoretical expense: ",payerExpenses[idFirstRowSameCol][idSameRowFirstCol].totalExpense);
+
+						payout =
 							payerExpenses[idFirstRowSameCol][idSameRowFirstCol].totalExpense;
 
-						console.log("tabledata: ", tableDataTmp);
+						//console.log("tabledata: ", tableDataTmp);
 
 						// Now 'totalExpense' contains the total expense for the specified payer and beneficiary
 						// totalExpence here not working because it doesn't exist
-						console.log(
-							`Total expense for payer ${idFirstRowSameCol} and beneficiary ${idSameRowFirstCol}: ${payerExpenses[idFirstRowSameCol][idSameRowFirstCol].totalExpense}`
-						);
+						//console.log(`Total expense for payer ${idFirstRowSameCol} and beneficiary ${idSameRowFirstCol}: ${payerExpenses[idFirstRowSameCol][idSameRowFirstCol].totalExpense}`);
 					} else {
-						console.log(
-							`Beneficiary with ID ${idSameRowFirstCol} not found for payer ${idFirstRowSameCol}`
-						);
+						//console.log(`Beneficiary with ID ${idSameRowFirstCol} not found for payer ${idFirstRowSameCol}`);
 					}
 				} else {
-					console.log(`Payer with ID ${idFirstRowSameCol} not found`);
+					//console.log(`Payer with ID ${idFirstRowSameCol} not found`);
+				}
+				if (idSameRowFirstCol !== idFirstRowSameCol) {
+					if (payerExpenses[idSameRowFirstCol]) {
+						if (payerExpenses[idSameRowFirstCol][idFirstRowSameCol]) {
+							console.log(
+								"payer expences: ",
+								payerExpenses[idSameRowFirstCol][idFirstRowSameCol].totalExpense
+							);
+							payout =
+								payout -
+								payerExpenses[idSameRowFirstCol][idFirstRowSameCol]
+									.totalExpense;
+							console.log("second payout: ", payout);
+						}
+					}
 				}
 
-				console.log("Updated cell:", tableDataTmp[row][col], row, col);
+				//console.log("Updated cell:", tableDataTmp[row][col], row, col);
+				if (payout !== 0) {
+					addRelation(payout);
+				}
+				tableDataTmp[row][col].text = payout;
 			}
 		}
 
-		console.log("people: ", people);
-		console.log("tabledata: ", tableDataTmp);
+		//console.log("people: ", people);
+		//console.log("tabledata: ", tableDataTmp);
 		setTableData(tableDataTmp);
 	}
 
@@ -170,6 +167,14 @@ export default function App() {
 		setTransactionModalIsVisible(false);
 	};
 
+	function addRelation(newItem) {
+		setRelations((prevArray) => [
+			...prevArray,
+			{ text: newItem, id: Math.random().toString() },
+		]);
+		console.log("adding relation: ", newItem);
+	}
+
 	function addPerson(newItem) {
 		setPeople((prevArray) => [
 			...prevArray,
@@ -177,9 +182,15 @@ export default function App() {
 		]);
 	}
 
-	function deleteGoalHandler(id) {
-		setPeople((prevCourseGoals) => {
-			return prevCourseGoals.filter((goal) => goal.id !== id);
+	function deletePerson(id) {
+		setPeople((prevList) => {
+			return prevList.filter((goal) => goal.id !== id);
+		});
+	}
+
+	function deleteHistoryItem(id) {
+		setHistory((prevList) => {
+			return prevList.filter((goal) => goal.id !== id);
 		});
 	}
 
@@ -194,15 +205,30 @@ export default function App() {
 		return undefined;
 	}
 
+	const dateFormatter = new Intl.DateTimeFormat("en-US", {
+		year: "2-digit",
+		month: "numeric",
+		day: "numeric",
+		hour: "numeric",
+		minute: "numeric",
+	});
+
+	const renderRelation = ({ item }) => (
+		<View key={item.id} style={styles.listItem}>
+			<Text style={styles.itemDisplayed}>{item.text}</Text>
+			{/* {item.text} */}
+		</View>
+	);
+
 	return (
 		<>
 			<StatusBar style="light" />
 			<View style={styles.appContainer}>
 				<View style={styles.topBar}>
 					<View></View>
-					<Text style={styles.title}>Trip Mate</Text>
+					<Text style={styles.title}>Splitwise</Text>
 					<View style={styles.threeDot}>
-						<Button title="⋮" color={"#8a1f56"} onPress={startNameInput} />
+						<Button title="⋮" color={"#db0e52"} onPress={startNameInput} />
 					</View>
 				</View>
 
@@ -210,7 +236,14 @@ export default function App() {
 					<PeopleTable tableData={tableData} />
 				</SafeAreaView>
 
-				{/* <PayerExpensesList aggregatedExpenses={sums} /> */}
+				{/* FlatList for tableData */}
+				<FlatList
+					data={relations}
+					keyExtractor={(item) => item.id}
+					renderItem={renderRelation}
+				/>
+
+				{/* <PayerExpensesList aggregatedExpenses={sums} />
 
 				{/* History Section */}
 				<View style={styles.historyContainer}>
@@ -221,7 +254,10 @@ export default function App() {
 						renderItem={({ item }) => (
 							<View style={styles.listItem}>
 								<Text style={styles.itemDisplayed}>
-									Payer: {item.data.payer.text}
+									Payer: {item.data.payer.text} {"             "}Description:{" "}
+									{item.data.description}
+									{"\n"}
+									Date: {dateFormatter.format(item.data.time)}
 									{"\n"}
 									Beneficiaries:{"\n"}
 									{item.data.beneficiaries &&
@@ -230,6 +266,9 @@ export default function App() {
 												` - ${beneficiary.name}: ${beneficiary.price}\n`
 										)}
 								</Text>
+								<TouchableOpacity onPress={() => deleteHistoryItem(item.id)}>
+									<Text style={styles.deleteButton}>Delete</Text>
+								</TouchableOpacity>
 							</View>
 						)}
 					/>
@@ -259,7 +298,7 @@ export default function App() {
 					addPerson={addPerson}
 					dataArray={people}
 					setDataArray={setPeople}
-					onDelete={deleteGoalHandler}
+					onDelete={deletePerson}
 				/>
 			</View>
 		</>
@@ -271,7 +310,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 		padding: 50,
 		paddingHorizontal: 16,
-		backgroundColor: "#3d1425",
+		backgroundColor: "#191538",
 	},
 	topBar: {
 		flexDirection: "row",
@@ -279,10 +318,12 @@ const styles = StyleSheet.create({
 	},
 	title: {
 		textAlign: "center",
-		color: "#b03e5a",
+		color: "#db0e52",
 		fontSize: 28,
 	},
-	threeDot: {},
+	threeDot: {
+		marginTop: 1,
+	},
 	peopleTable: {
 		marginTop: 16,
 	},
@@ -303,7 +344,7 @@ const styles = StyleSheet.create({
 		position: "absolute",
 		bottom: 20,
 		right: 20,
-		backgroundColor: "#8a1f56",
+		backgroundColor: "#db0e52",
 		borderRadius: 50,
 		width: 50,
 		height: 50,
@@ -313,5 +354,16 @@ const styles = StyleSheet.create({
 	addButtonText: {
 		color: "white",
 		fontSize: 24,
+	},
+	listItem: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center",
+		padding: 10,
+		borderBottomWidth: 1,
+		borderBottomColor: "lightgray",
+	},
+	deleteButton: {
+		color: "red",
 	},
 });

@@ -35,10 +35,14 @@ const NameInput = (props) => {
 	);
 
 	return (
-		<Modal visible={props.visible} animationType="slide">
+		<Modal
+			visible={props.visible}
+			animationType="slide"
+			onRequestClose={props.onBackPress}
+		>
 			<View style={styles.container}>
 				<View style={styles.backButton}>
-					<Button title="Back" onPress={props.onBackPress} color="#ca3681" />
+					<Button title="Back" onPress={props.onBackPress} color="#db0e52" />
 				</View>
 
 				<FlatList
@@ -79,7 +83,7 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		padding: 20,
-		backgroundColor: "#3d1425",
+		backgroundColor: "#191538",
 	},
 	input: {
 		height: 50,
@@ -97,7 +101,7 @@ const styles = StyleSheet.create({
 		width: 50,
 		height: 50,
 		borderRadius: 25,
-		backgroundColor: "#ca3681",
+		backgroundColor: "#db0e52",
 		justifyContent: "center",
 		alignItems: "center",
 	},

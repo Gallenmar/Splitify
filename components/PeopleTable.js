@@ -39,11 +39,14 @@ const PeopleTable = ({ tableData }) => {
 	// 	</View>
 	// );
 
-	const newTextArray = tableData.map((row) => row.map((item) => item.text));
+	//const newTextArray = tableData.map((row) => row.map((item) => item.text));
+	const newTextArray = tableData.map((row) =>
+		row.map((item) => (item.text === 0 ? "" : item.text))
+	);
 
 	return (
 		<View style={{ padding: 0 }}>
-			<Table borderStyle={{ borderWidth: 2, borderColor: "#c8e1ff" }}>
+			<Table borderStyle={{ borderWidth: 2, borderColor: "#aca7c7" }}>
 				<Rows data={newTextArray} textStyle={{ color: "white" }} />
 			</Table>
 		</View>
