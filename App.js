@@ -26,7 +26,7 @@ export default function App() {
 	const [people, setPeople] = useState([]);
 	const [history, setHistory] = useState([]);
 	const [tableData, setTableData] = useState([]);
-	const [relations, setRelations] = useState([]);
+	const [debts, setDebts] = useState([]);
 
 	//TODO
 	//create an empty list
@@ -38,6 +38,7 @@ export default function App() {
 	//+create a deleter
 
 	function updateTableData() {
+		setDebts([]);
 		const payerExpenses = {};
 		history.forEach((payment) => {
 			const payer = payment.data.payer.id; //id+text
@@ -110,22 +111,22 @@ export default function App() {
 				if (idSameRowFirstCol !== idFirstRowSameCol) {
 					if (payerExpenses[idSameRowFirstCol]) {
 						if (payerExpenses[idSameRowFirstCol][idFirstRowSameCol]) {
-							console.log(
-								"payer expences: ",
-								payerExpenses[idSameRowFirstCol][idFirstRowSameCol].totalExpense
-							);
+							// console.log(
+							// 	"payer expences: ",
+							// 	payerExpenses[idSameRowFirstCol][idFirstRowSameCol].totalExpense
+							// );
 							payout =
 								payout -
 								payerExpenses[idSameRowFirstCol][idFirstRowSameCol]
 									.totalExpense;
-							console.log("second payout: ", payout);
+							// console.log("second payout: ", payout);
 						}
 					}
 				}
 
 				//console.log("Updated cell:", tableDataTmp[row][col], row, col);
 				if (payout !== 0) {
-					addRelation(payout);
+					makeInvoice(payout, idSameRowFirstCol, idFirstRowSameCol);
 				}
 				tableDataTmp[row][col].text = payout;
 			}
@@ -167,12 +168,39 @@ export default function App() {
 		setTransactionModalIsVisible(false);
 	};
 
-	function addRelation(newItem) {
-		setRelations((prevArray) => [
+	function getPersonNameById(personId) {
+		const person = people.find((p) => p.id === personId);
+		return person ? person.text : "Error4";
+	}
+
+	function makeInvoice(price, idDebtor, idLender) {
+		let debtorName = getPersonNameById(idDebtor);
+		let lenderName = getPersonNameById(idLender);
+		if (debtorName != lenderName) {
+			//let line;
+			if (price < 0) {
+				price = -price;
+				//line = `${lenderName} owes ${debtorName} ${price}€`;\
+				addRelation(price, lenderName, debtorName, idLender, idDebtor);
+			} else {
+				//line = `${debtorName} owes ${lenderName} ${price}€`;
+				addRelation(price, debtorName, lenderName, idDebtor, idLender);
+			}
+		}
+	}
+
+	function addRelation(price, debtorName, lenderName, idDebtor, idLender) {
+		setDebts((prevArray) => [
 			...prevArray,
-			{ text: newItem, id: Math.random().toString() },
+			{
+				price: price,
+				debtorName: debtorName,
+				lenderName: lenderName,
+				idDebtor: idDebtor,
+				idLender: idLender,
+				id: Math.random().toString(),
+			},
 		]);
-		console.log("adding relation: ", newItem);
 	}
 
 	function addPerson(newItem) {
@@ -215,7 +243,9 @@ export default function App() {
 
 	const renderRelation = ({ item }) => (
 		<View key={item.id} style={styles.listItem}>
-			<Text style={styles.itemDisplayed}>{item.text}</Text>
+			<Text style={styles.itemDisplayed}>
+				{item.debtorName} owes {item.lenderName} {item.price}€
+			</Text>
 			{/* {item.text} */}
 		</View>
 	);
@@ -237,41 +267,45 @@ export default function App() {
 				</SafeAreaView>
 
 				{/* FlatList for tableData */}
-				<FlatList
-					data={relations}
-					keyExtractor={(item) => item.id}
-					renderItem={renderRelation}
-				/>
+				<View style={styles.container}>
+					<View style={styles.halfContainer}>
+						<FlatList
+							data={debts}
+							keyExtractor={(item) => item.id}
+							renderItem={renderRelation}
+						/>
+					</View>
 
-				{/* <PayerExpensesList aggregatedExpenses={sums} />
+					{/* <PayerExpensesList aggregatedExpenses={sums} />
 
 				{/* History Section */}
-				<View style={styles.historyContainer}>
-					<Text style={styles.historyTitle}>Transaction History</Text>
-					<FlatList
-						data={history}
-						keyExtractor={(item) => item.id}
-						renderItem={({ item }) => (
-							<View style={styles.listItem}>
-								<Text style={styles.itemDisplayed}>
-									Payer: {item.data.payer.text} {"             "}Description:{" "}
-									{item.data.description}
-									{"\n"}
-									Date: {dateFormatter.format(item.data.time)}
-									{"\n"}
-									Beneficiaries:{"\n"}
-									{item.data.beneficiaries &&
-										item.data.beneficiaries.map(
-											(beneficiary) =>
-												` - ${beneficiary.name}: ${beneficiary.price}\n`
-										)}
-								</Text>
-								<TouchableOpacity onPress={() => deleteHistoryItem(item.id)}>
-									<Text style={styles.deleteButton}>Delete</Text>
-								</TouchableOpacity>
-							</View>
-						)}
-					/>
+					<View style={styles.halfContainer}>
+						<Text style={styles.historyTitle}>Transaction History</Text>
+						<FlatList
+							data={history}
+							keyExtractor={(item) => item.id}
+							renderItem={({ item }) => (
+								<View style={styles.listItem}>
+									<Text style={styles.itemDisplayed}>
+										Payer: {item.data.payer.text} {"             "}Description:{" "}
+										{item.data.description}
+										{"\n"}
+										Date: {dateFormatter.format(item.data.time)}
+										{"\n"}
+										Beneficiaries:{"\n"}
+										{item.data.beneficiaries &&
+											item.data.beneficiaries.map(
+												(beneficiary) =>
+													` - ${beneficiary.name}: ${beneficiary.price}\n`
+											)}
+									</Text>
+									<TouchableOpacity onPress={() => deleteHistoryItem(item.id)}>
+										<Text style={styles.deleteButton}>Delete</Text>
+									</TouchableOpacity>
+								</View>
+							)}
+						/>
+					</View>
 				</View>
 
 				{/* + Button to open the transaction modal */}
@@ -288,6 +322,7 @@ export default function App() {
 					onClose={closeTransactionModal}
 					people={people}
 					getData={getData}
+					debts={debts}
 					// Add any necessary props for the transaction modal
 				/>
 
@@ -333,6 +368,13 @@ const styles = StyleSheet.create({
 	historyContainer: {
 		marginTop: 20,
 		flex: 1,
+	},
+	container: {
+		flex: 1,
+		flexDirection: "column", // Arrange children in a row
+	},
+	halfContainer: {
+		flex: 1, // Each FlatList takes up half of the available space
 	},
 	historyTitle: {
 		fontSize: 18,

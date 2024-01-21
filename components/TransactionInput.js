@@ -10,7 +10,13 @@ import {
 	StyleSheet,
 } from "react-native";
 
-const TransactionInputModal = ({ visible, onClose, people, getData }) => {
+const TransactionInputModal = ({
+	visible,
+	onClose,
+	people,
+	getData,
+	debts,
+}) => {
 	const [selectedPayer, setSelectedPayer] = useState(null);
 	const [selectedBeneficiaries, setSelectedBeneficiaries] = useState([]);
 	const [totalSum, setTotalSum] = useState(0);
@@ -19,6 +25,7 @@ const TransactionInputModal = ({ visible, onClose, people, getData }) => {
 	const [isTotalSumInput, setIsTotalSumInput] = useState(true);
 	const [pricePlaceholder, setPricePlaceholder] = useState(0);
 	const [writtenPrice, setWrittenPrice] = useState(0);
+	const [errorMessage, setErrorMessage] = useState("");
 
 	const handlePayerSelection = (payer) => {
 		setSelectedPayer(payer);
@@ -40,25 +47,34 @@ const TransactionInputModal = ({ visible, onClose, people, getData }) => {
 		// console.log("Integer price is ", priceInt);
 		// console.log(typeof priceInt);
 
-		const priceRegex = /^\d{1,3}(,\d{3})*(\.\d{2})?$/;
+		const priceRegex = /^\d{1,3}(,\d{3})*(\.\d{1,2})?$/;
+
 		if (!priceRegex.test(price)) {
 			//console.log("Invalid price input");
 			//return; // Exit the function if the input is invalid
 			// todo create a handle for invalid price input
+			setPrices((prevPrices) => ({
+				...prevPrices,
+				//[beneficiary.id]: price,
+				[beneficiary.id]: price,
+			}));
+			//setErrorMessage("One of the prices entered is not a valid format.");
+		} else {
+			//setErrorMessage("");
+			// Remove commas and convert to a float with two decimal places
+			const priceFloat = parseFloat(price.replace(/,/g, ""));
+			const roundedPrice = Math.round(priceFloat * 100) / 100; // Round to two decimal places
+
+			//console.log("Processed price is ", roundedPrice);
+			//console.log(typeof roundedPrice);
+
+			setPrices((prevPrices) => ({
+				...prevPrices,
+				//[beneficiary.id]: price,
+				[beneficiary.id]: roundedPrice,
+			}));
+			setIsTotalSumInput(false);
 		}
-		// Remove commas and convert to a float with two decimal places
-		const priceFloat = parseFloat(price.replace(/,/g, ""));
-		const roundedPrice = Math.round(priceFloat * 100) / 100; // Round to two decimal places
-
-		//console.log("Processed price is ", roundedPrice);
-		//console.log(typeof roundedPrice);
-
-		setPrices((prevPrices) => ({
-			...prevPrices,
-			//[beneficiary.id]: price,
-			[beneficiary.id]: roundedPrice,
-		}));
-		setIsTotalSumInput(false);
 	};
 
 	const calculateTotalSum = () => {
@@ -79,6 +95,33 @@ const TransactionInputModal = ({ visible, onClose, people, getData }) => {
 	const currentDate = new Date();
 
 	const handleDone = () => {
+		if (!selectedPayer && selectedBeneficiaries.length === 0) {
+			// Handle close without initializing result
+			//console.log("There is nothing to add");
+			handleClose();
+			return; // Exit the function early
+		}
+		const priceRegex = /^\d{1,3}(,\d{3})*(\.\d{1,2})?$/;
+		for (const itemId in prices) {
+			console.log("all the prices: ", prices[itemId]);
+			if (!priceRegex.test(prices[itemId])) {
+				console.log("here here");
+				setErrorMessage("One of the prices entered is not a valid format.");
+				return;
+			}
+		}
+
+		if (!selectedPayer) {
+			setErrorMessage("Selected payer is empty. Cannot proceed.");
+			//handleClose();
+			return; // Exit the function early
+		}
+		if (selectedBeneficiaries.length === 0) {
+			setErrorMessage("Selected beneficiaries are empty. Cannot proceed.");
+			//handleClose();
+			return; // Exit the function early
+		}
+
 		const result = {
 			time: currentDate,
 			description: description,
@@ -103,15 +146,16 @@ const TransactionInputModal = ({ visible, onClose, people, getData }) => {
 		setPricePlaceholder(0);
 		setIsTotalSumInput(true);
 		setWrittenPrice(0);
+		setErrorMessage("");
 
 		onClose();
 	};
 
-	const renderItem = ({ item }) => (
+	const renderPriceInputField = ({ item }) => (
 		<View key={item.id} style={styles.priceInputContainer}>
 			<Text style={styles.text}>{item.text}</Text>
 			<TextInput
-				value={prices[item.id]}
+				value={String(prices[item.id])}
 				style={styles.priceInput}
 				keyboardType="numeric"
 				placeholder="Enter price"
@@ -131,22 +175,70 @@ const TransactionInputModal = ({ visible, onClose, people, getData }) => {
 
 	useEffect(() => {
 		if (isTotalSumInput) {
-			//console.log("here2");
-			const equalPrice =
-				parseFloat(writtenPrice) / selectedBeneficiaries.length;
-			const updatedPrices = {};
-			for (const beneficiary of selectedBeneficiaries) {
-				//console.log("here3");
-				updatedPrices[beneficiary.id] = equalPrice.toFixed(2);
+			console.log(parseFloat(writtenPrice));
+			let updatedPrices = {};
+			if (!isNaN(parseFloat(writtenPrice))) {
+				console.log("here2");
+				const equalPrice =
+					parseFloat(writtenPrice) / selectedBeneficiaries.length;
+
+				updatedPrices = {};
+				let sum = 0;
+				selectedBeneficiaries.forEach((beneficiary, index) => {
+					if (index === selectedBeneficiaries.length - 1) {
+						// Manipulate the last item differently
+						// Your custom logic for the last item goes here
+						// For example, you can do something like:
+						const lastItemPrice = parseFloat(writtenPrice) - sum; // Adjust this according to your needs
+						updatedPrices[beneficiary.id] = lastItemPrice.toFixed(2);
+					} else {
+						// For other items, use the standard equalPrice
+						sum = sum + Number(equalPrice.toFixed(2));
+						updatedPrices[beneficiary.id] = equalPrice.toFixed(2);
+					}
+				});
+				//console.log("here4: ", updatedPrices);
+			} else {
+				const equalPrice = 0;
+				updatedPrices = {};
+				selectedBeneficiaries.forEach((beneficiary, index) => {
+					updatedPrices[beneficiary.id] = equalPrice.toFixed(2);
+				});
 			}
 			setPrices(updatedPrices);
-			//console.log("here4: ", updatedPrices);
 		}
 	}, [writtenPrice, selectedBeneficiaries]);
 
 	const handleEqualDivisionToggle = () => {
 		setIsTotalSumInput((prevIsTotalSumInput) => !prevIsTotalSumInput);
 		setPricePlaceholder(totalSum);
+	};
+
+	function findTheirDebt(personId) {
+		if (selectedPayer) {
+			const debt = debts.find(
+				(p) => p.idDebtor === personId && p.idLender === selectedPayer.id
+			);
+			if (debt) {
+				return "owes already " + debt.price;
+			} else {
+				const debt = debts.find(
+					(p) => p.idLender === personId && p.idDebtor === selectedPayer.id
+				);
+				return debt ? "is owed " + debt.price : "";
+			}
+			//return debt ? "owes already " + debt.price : "";
+		} else {
+			return "";
+		}
+	}
+
+	const renderErrorMessage = () => {
+		return (
+			<View style={styles.errorMessageContainer}>
+				<Text style={styles.errorMessageText}>{errorMessage}</Text>
+			</View>
+		);
 	};
 
 	return (
@@ -203,7 +295,9 @@ const TransactionInputModal = ({ visible, onClose, people, getData }) => {
 									]}
 									onPress={() => handleBeneficiarySelection(item)}
 								>
-									<Text style={styles.text}>{item.text}</Text>
+									<Text style={styles.text}>
+										{item.text} {findTheirDebt(item.id)}
+									</Text>
 								</TouchableOpacity>
 							)}
 						/>
@@ -243,11 +337,12 @@ const TransactionInputModal = ({ visible, onClose, people, getData }) => {
 					</View>
 					<FlatList
 						data={selectedBeneficiaries}
-						renderItem={renderItem}
+						renderItem={renderPriceInputField}
 						keyExtractor={(item) => item.id.toString()}
 					/>
 				</View>
 				<Button title="Done" onPress={handleDone} />
+				{errorMessage && renderErrorMessage()}
 			</View>
 		</Modal>
 	);
@@ -359,6 +454,20 @@ const styles = StyleSheet.create({
 	},
 	equalDivisionToggleText: {
 		color: "white",
+	},
+	errorMessageContainer: {
+		position: "absolute",
+		bottom: 60, // Adjust the distance from the bottom as needed
+		left: 0,
+		right: 0,
+		backgroundColor: "red", // Adjust the background color
+		paddingVertical: 10,
+		justifyContent: "center",
+		alignItems: "center",
+	},
+	errorMessageText: {
+		color: "white",
+		fontSize: 16,
 	},
 });
 
