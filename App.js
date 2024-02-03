@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import {
+	AsyncStorage,
 	StyleSheet,
 	View,
 	FlatList,
@@ -36,6 +37,42 @@ export default function App() {
 	//list = list(ben,price)
 	//store payer and ben as id
 	//+create a deleter
+
+	// Load data from AsyncStorage on app start
+	useEffect(() => {
+		const loadData = async () => {
+			try {
+				const storedPeople = await AsyncStorage.getItem("@people");
+				const storedHistory = await AsyncStorage.getItem("@history");
+
+				if (storedPeople) {
+					setPeople(JSON.parse(storedPeople));
+				}
+
+				if (storedHistory) {
+					setHistory(JSON.parse(storedHistory));
+				}
+			} catch (error) {
+				console.error("Error loading data from AsyncStorage:", error);
+			}
+		};
+
+		loadData();
+	}, []);
+
+	// Save data to AsyncStorage when people or history state changes
+	useEffect(() => {
+		const saveData = async () => {
+			try {
+				await AsyncStorage.setItem("@people", JSON.stringify(people));
+				await AsyncStorage.setItem("@history", JSON.stringify(history));
+			} catch (error) {
+				console.error("Error saving data to AsyncStorage:", error);
+			}
+		};
+
+		saveData();
+	}, [people, history]);
 
 	function updateTableData() {
 		setDebts([]);
