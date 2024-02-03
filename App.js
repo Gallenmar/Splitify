@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import {
-	AsyncStorage,
 	StyleSheet,
 	View,
 	FlatList,
@@ -17,6 +16,7 @@ import { useFonts } from "expo-font";
 import NameInput from "./components/NameInput";
 import TransactionInputModal from "./components/TransactionInput";
 import PeopleTable from "./components/PeopleTable";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import PayerExpensesList from "./components/PayerExpensesList";
 
 export default function App() {
