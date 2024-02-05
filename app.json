@@ -4,7 +4,7 @@
 		"slug": "TravelCalculator",
 		"version": "1.0.0",
 		"orientation": "portrait",
-		"icon": "./assets/TripMate.png",
+		"icon": "./assets/calc.jpg",
 		"userInterfaceStyle": "light",
 		"splash": {
 			"image": "./assets/splash.png",

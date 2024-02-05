@@ -102,10 +102,11 @@ export default function App() {
 				const priceFloat = parseFloat(price); // lets hope TransactionInput.handlePriceInput inputed a valid price in float
 				//todo handle possible error here. Throw error code or smth
 
-				payerExpenses[payer][id].totalExpense += parseFloat(price);
+				payerExpenses[payer][id].totalExpense += parseFloat(price).toFixed(2);
+				console.log("then price: ", price);
 				payerExpenses[payer][id].totalExpense = parseFloat(
 					payerExpenses[payer][id].totalExpense
-				);
+				).toFixed(2);
 			});
 		});
 
@@ -162,10 +163,13 @@ export default function App() {
 				}
 
 				//console.log("Updated cell:", tableDataTmp[row][col], row, col);
+
+				payout = Math.round(payout * 100) / 100; // rounding down to 2 decimal points
+				// todo store all the prices in cents, ie integers
+				tableDataTmp[row][col].text = payout;
 				if (payout !== 0) {
 					makeInvoice(payout, idSameRowFirstCol, idFirstRowSameCol);
 				}
-				tableDataTmp[row][col].text = payout;
 			}
 		}
 
@@ -324,10 +328,15 @@ export default function App() {
 							renderItem={({ item }) => (
 								<View style={styles.listItem}>
 									<Text style={styles.itemDisplayed}>
-										Payer: {item.data.payer.text} {"             "}Description:{" "}
-										{item.data.description}
+										{item.data.description !== "" && (
+											<Text style={{ fontSize: 20, fontWeight: "bold" }}>
+												{item.data.description} {"\n"}
+											</Text>
+										)}
+										Payer: {item.data.payer.text} {"             "}
 										{"\n"}
-										Date: {dateFormatter.format(item.data.time)}
+										{/* Date: {dateFormatter.format(item.data.time)} */}
+										Date: {item.data.time.toString()}
 										{"\n"}
 										Beneficiaries:{"\n"}
 										{item.data.beneficiaries &&
