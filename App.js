@@ -102,11 +102,13 @@ export default function App() {
 				const priceFloat = parseFloat(price); // lets hope TransactionInput.handlePriceInput inputed a valid price in float
 				//todo handle possible error here. Throw error code or smth
 
-				payerExpenses[payer][id].totalExpense += parseFloat(price).toFixed(2);
-				console.log("then price: ", price);
+				payerExpenses[payer][id].totalExpense += parseFloat(price);
+				console.log("price: ", price);
+				console.log("actual price: ", parseFloat(price).toFixed(2));
+				console.log("resulting price: ", payerExpenses[payer][id].totalExpense);
 				payerExpenses[payer][id].totalExpense = parseFloat(
 					payerExpenses[payer][id].totalExpense
-				).toFixed(2);
+				);
 			});
 		});
 
@@ -170,6 +172,7 @@ export default function App() {
 				if (payout !== 0) {
 					makeInvoice(payout, idSameRowFirstCol, idFirstRowSameCol);
 				}
+				console.log("payout: ", payout);
 			}
 		}
 
