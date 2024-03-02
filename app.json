@@ -1,15 +1,15 @@
 {
 	"expo": {
-		"name": "TravelCalculator",
-		"slug": "TravelCalculator",
+		"name": "Splitwise",
+		"slug": "Splitwise",
 		"version": "1.0.0",
 		"orientation": "portrait",
-		"icon": "./assets/calc.jpg",
+		"icon": "./assets/splitwise_icon.png",
 		"userInterfaceStyle": "light",
 		"splash": {
-			"image": "./assets/splash.png",
+			"image": "./assets/splitwise_splash.png",
 			"resizeMode": "contain",
-			"backgroundColor": "#ffffff"
+			"backgroundColor": "#191538"
 		},
 		"assetBundlePatterns": ["**/*"],
 		"ios": {
