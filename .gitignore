@@ -35,5 +35,4 @@ yarn-error.*
 *.tsbuildinfo
 
 # Additional folders to exclude
-assets/
 archive/
